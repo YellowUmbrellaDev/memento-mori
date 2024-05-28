@@ -8,7 +8,6 @@ const Memer = () => {
   useEffect(() => {
     const canvasInstance = initCanvas();
     setCanvas(canvasInstance);
-    document.body.onpaste = handlePaste;
     window.addEventListener('keydown', (e: KeyboardEvent) => handleKeyDown(e, canvasInstance));
     canvasInstance.on('mouse:dblclick', (options: fabric.IEvent) => {
       if (options.target && options.target.type === 'text') {
