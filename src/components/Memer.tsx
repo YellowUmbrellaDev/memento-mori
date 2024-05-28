@@ -12,7 +12,8 @@ const Memer = () => {
     window.addEventListener('keydown', (e: KeyboardEvent) => handleKeyDown(e, canvasInstance));
     canvasInstance.on('mouse:dblclick', (options: fabric.IEvent) => {
       if (options.target && options.target.type === 'text') {
-        options.target.enterEditing();
+        const textTarget = options.target as fabric.IText;
+        textTarget.enterEditing();
       }
     });
     return () => {
@@ -54,7 +55,6 @@ const Memer = () => {
       fontWeight: '',
       originX: 'left',
       hasRotatingPoint: true,
-      centerTransform: true
     });
     canvi.add(text);
     canvi.renderAll();
@@ -63,7 +63,7 @@ const Memer = () => {
   const addImg = (e: React.FormEvent, urls: string[], canvi: fabric.Canvas) => {
     e.preventDefault();
     urls.forEach(url => {
-      new fabric.Image.fromURL(url, (img: fabric.Image) => {
+      fabric.Image.fromURL(url, (img: fabric.Image) => {
         img.scale(0.25);
         if (canvi) {
           canvi.add(img);
@@ -80,14 +80,19 @@ const Memer = () => {
     setImgURLs(urls);
   }
 
-  const handlePaste = (e: ClipboardEvent) => {
-    if (e.clipboardData?.files.length) {
-      const fileObject = e.clipboardData.files[0];
-      addImg({ preventDefault: () => {} }, [URL.createObjectURL(fileObject)], canvas!);
-    } else {
-      alert(
-        "No image data was found in your clipboard. Copy an image first or take a screenshot."
-      );
+  const handlePaste = (e: React.ClipboardEvent) => {
+    if (e.clipboardData?.items) {
+      const file = Array.from(e.clipboardData.items).find(item => item.kind === 'file');
+      if (file) {
+        const blob = file.getAsFile();
+        if (blob) {
+          addImg({ preventDefault: () => {} } as React.FormEvent, [URL.createObjectURL(blob)], canvas!);
+        }
+      } else {
+        alert(
+          "No image data was found in your clipboard. Copy an image first or take a screenshot."
+        );
+      }
     }
   };
 
